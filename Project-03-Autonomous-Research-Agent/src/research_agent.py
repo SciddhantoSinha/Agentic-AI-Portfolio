@@ -32,16 +32,15 @@ registry.register(
 
 class AutonomousResearchAgent:
     """
-    Autonomous research agent using iterative tool calling.
+    Autonomous research agent using an iterative ReAct-style loop.
 
-    The agent:
-    1. Receives a research topic.
-    2. Asks the LLM what action to take.
-    3. Executes requested tools.
-    4. Feeds observations back to the LLM.
-    5. Continues until a final answer is produced.
-    6. Stops when the maximum iteration limit is reached.
-    7. Detects repeated identical tool calls.
+    The agent can:
+    - decide when to use a research tool,
+    - execute registered tools,
+    - feed observations back into the conversation,
+    - reflect when repeated searches produce no useful evidence,
+    - stop after a maximum number of iterations,
+    - detect repeated identical tool calls.
     """
 
     def __init__(self, api_key: str):
@@ -67,6 +66,41 @@ class AutonomousResearchAgent:
         return hashlib.sha256(
             payload.encode("utf-8")
         ).hexdigest()
+
+    @staticmethod
+    def _is_zero_yield_observation(
+        tool_output: str,
+    ) -> bool:
+        """
+        Determine whether a tool returned no useful research evidence.
+        """
+
+        normalized = tool_output.strip().lower()
+
+        zero_yield_markers = {
+            "",
+            "no papers found.",
+            "no papers found",
+        }
+
+        return normalized in zero_yield_markers
+
+    @staticmethod
+    def _reflection_message() -> str:
+        """
+        Generate a strategy-pivot instruction after repeated
+        zero-yield observations.
+        """
+
+        return (
+            "SCRATCHPAD REFLECTION: The previous research attempts "
+            "did not produce useful evidence. Re-evaluate the current "
+            "research strategy. Identify what information is missing, "
+            "broaden or reformulate the search semantics, and avoid "
+            "repeating the same unsuccessful query. If appropriate, "
+            "search using related terminology, alternative concepts, "
+            "or a narrower methodological angle."
+        )
 
     def run(
         self,
@@ -100,6 +134,7 @@ class AutonomousResearchAgent:
         ]
 
         previous_tool_hash = None
+        zero_yield_observations = 0
 
         for step in range(max_steps):
 
@@ -114,8 +149,7 @@ class AutonomousResearchAgent:
 
             messages.append(msg)
 
-            # If the model does not request a tool,
-            # it has produced the final answer.
+            # The model has produced a final answer.
             if not msg.tool_calls:
                 return msg.content
 
@@ -127,7 +161,7 @@ class AutonomousResearchAgent:
                     tool_call.function.arguments
                 )
 
-                # Prevent execution of unknown tools.
+                # Reject tools that are not registered.
                 if fn_name not in registry.tools:
                     raise ValueError(
                         f"Unknown tool requested: {fn_name}"
@@ -139,7 +173,7 @@ class AutonomousResearchAgent:
                     fn_args,
                 )
 
-                # Detect identical consecutive tool calls.
+                # Prevent identical consecutive tool calls.
                 if current_tool_hash == previous_tool_hash:
                     return (
                         "Agent stopped because the same tool call "
@@ -148,12 +182,18 @@ class AutonomousResearchAgent:
 
                 previous_tool_hash = current_tool_hash
 
-                # Execute the registered tool.
+                # Execute the tool.
                 tool_output = registry.tools[fn_name](
                     **fn_args
                 )
 
-                # Feed the observation back to the model.
+                # Track whether the observation produced evidence.
+                if self._is_zero_yield_observation(tool_output):
+                    zero_yield_observations += 1
+                else:
+                    zero_yield_observations = 0
+
+                # Add the tool observation to the conversation.
                 messages.append(
                     {
                         "role": "tool",
@@ -161,6 +201,18 @@ class AutonomousResearchAgent:
                         "content": tool_output,
                     }
                 )
+
+                # After two consecutive zero-yield observations,
+                # force the agent to reflect and change strategy.
+                if zero_yield_observations >= 2:
+                    messages.append(
+                        {
+                            "role": "system",
+                            "content": self._reflection_message(),
+                        }
+                    )
+
+                    zero_yield_observations = 0
 
         return (
             "Max iteration depth reached without "
