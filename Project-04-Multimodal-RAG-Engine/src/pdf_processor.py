@@ -23,12 +23,6 @@ class PDFProcessor:
     ) -> List[Dict]:
         """
         Extract text and metadata from every PDF page.
-
-        Args:
-            pdf_path: Path to the PDF document.
-
-        Returns:
-            Page-level document information.
         """
 
         path = Path(pdf_path)
@@ -63,12 +57,6 @@ class PDFProcessor:
     ) -> List[Dict]:
         """
         Extract embedded images from a PDF.
-
-        Args:
-            pdf_path: Path to the PDF document.
-
-        Returns:
-            Metadata and raw bytes for each embedded image.
         """
 
         path = Path(pdf_path)
@@ -116,13 +104,6 @@ class PDFProcessor:
     ) -> bytes:
         """
         Render a PDF page into PNG image bytes.
-
-        Args:
-            pdf_path: Path to the PDF document.
-            page_number: One-based page number.
-
-        Returns:
-            PNG image bytes for the requested page.
         """
 
         path = Path(pdf_path)
@@ -139,13 +120,14 @@ class PDFProcessor:
 
         document = fitz.open(pdf_path)
 
-            if page_number > len(document):
-                page_count = len(document)
-                document.close()
+        page_count = len(document)
 
-    raise ValueError(
-        f"PDF contains only {page_count} pages."
-    )
+        if page_number > page_count:
+            document.close()
+
+            raise ValueError(
+                f"PDF contains only {page_count} pages."
+            )
 
         page = document.load_page(
             page_number - 1
