@@ -1,32 +1,3 @@
-Absolutely. The **root `README.md`** should represent the entire portfolio, not any individual project.
-
-It should present the five projects as a **progressive Agentic AI engineering journey**, with the same professional depth and formatting style as your Project 04 README.
-
-Based on the project architecture we've built, the portfolio progression is:
-
-```text
-Project 01 → RAG Fundamentals
-Project 02 → Enterprise Legal AI
-Project 03 → Autonomous Research Agent
-Project 04 → Multimodal RAG
-Project 05 → Real-Time Agentic RAG
-```
-
-The Project 05 architecture specifically adds dynamic routing, corrective retrieval, live information, and verification as the final layer. 
-
----
-
-# 🌐 ROOT `README.md`
-
-Go to:
-
-```text
-Agentic-AI-Portfolio/README.md
-```
-
-Replace the entire contents with this:
-
-````markdown
 # 🤖 Agentic AI Portfolio
 
 ### A Progressive Portfolio of Retrieval-Augmented Generation, Autonomous Agents, Multimodal AI, and Real-Time Agentic Systems
