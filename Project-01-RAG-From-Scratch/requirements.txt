@@ -1,5 +1,0 @@
-openai
-numpy
-faiss-cpu
-langchain-text-splitters
-pytest
