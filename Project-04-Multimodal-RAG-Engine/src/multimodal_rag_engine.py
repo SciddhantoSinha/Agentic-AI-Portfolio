@@ -1,195 +1,186 @@
 import base64
+import uuid
+from typing import Dict, List
 
-import pytest
+from openai import OpenAI
 
-from src.multimodal_rag_engine import (
-    MultimodalRAGEngine,
-)
-
-
-def create_test_engine():
-    engine = MultimodalRAGEngine.__new__(
-        MultimodalRAGEngine
-    )
-
-    engine.docstore = {}
-    engine.vector_index = []
-
-    from src.retriever import MultimodalRetriever
-
-    engine.retriever = MultimodalRetriever(
-        engine.vector_index
-    )
-
-    return engine
+from .retriever import MultimodalRetriever
 
 
-def test_image_encoding_returns_base64_string():
+class MultimodalRAGEngine:
+    """
+    Multimodal RAG engine using dual-representation indexing.
 
-    image_bytes = b"test-image-data"
+    Visual assets are:
+    1. Summarized by a vision-capable LLM.
+    2. Stored as raw base64 data in a document store.
+    3. Represented by textual summaries for semantic retrieval.
+    4. Retrieved through their summary representation.
+    5. Resolved back to the original visual asset for generation.
+    """
 
-    encoded = (
-        MultimodalRAGEngine._encode_image_b64(
+    def __init__(self, api_key: str):
+        self.client = OpenAI(api_key=api_key)
+
+        self.docstore: Dict[str, Dict] = {}
+        self.vector_index: List[Dict] = []
+
+        self.retriever = MultimodalRetriever(
+            self.vector_index
+        )
+
+    @staticmethod
+    def _encode_image_b64(
+        image_bytes: bytes,
+    ) -> str:
+        return base64.b64encode(
             image_bytes
-        )
-    )
+        ).decode("utf-8")
 
-    assert isinstance(encoded, str)
-
-    assert encoded != ""
-
-
-def test_engine_initializes_empty_stores():
-
-    agent = create_test_engine()
-
-    assert agent.docstore == []
-
-    assert agent.vector_index == []
-
-
-def test_query_without_indexed_documents_is_rejected():
-
-    agent = create_test_engine()
-
-    with pytest.raises(
-        ValueError,
-        match="No visual elements have been indexed",
-    ):
-        agent.query_multimodal(
-            "What does the image show?"
-        )
-
-
-def test_ingested_visual_element_is_stored():
-
-    agent = create_test_engine()
-
-    def fake_summary(
+    def summarize_visual_element(
+        self,
         image_bytes: bytes,
         element_type: str = "chart",
     ) -> str:
-        return (
-            "A chart showing quarterly revenue trends."
+
+        b64_img = self._encode_image_b64(
+            image_bytes
         )
 
-    agent.summarize_visual_element = fake_summary
-
-    doc_id = agent.ingest_image_element(
-        image_bytes=b"test-image",
-        element_type="chart",
-    )
-
-    assert doc_id in agent.docstore
-
-    assert len(agent.vector_index) == 1
-
-    assert (
-        agent.vector_index[0]["doc_id"]
-        == doc_id
-    )
-
-    assert (
-        agent.vector_index[0]["summary"]
-        == "A chart showing quarterly revenue trends."
-    )
-
-    assert (
-        agent.vector_index[0]["element_type"]
-        == "chart"
-    )
-
-    assert (
-        agent.docstore[doc_id]["type"]
-        == "image"
-    )
-
-
-def test_ingested_image_preserves_original_bytes_as_base64():
-
-    agent = create_test_engine()
-
-    agent.summarize_visual_element = (
-        lambda image_bytes, element_type="chart":
-        "Visual summary"
-    )
-
-    original_bytes = b"original-visual-data"
-
-    doc_id = agent.ingest_image_element(
-        image_bytes=original_bytes,
-        element_type="diagram",
-    )
-
-    stored_base64 = agent.docstore[doc_id]["b64"]
-
-    decoded_bytes = base64.b64decode(
-        stored_base64
-    )
-
-    assert decoded_bytes == original_bytes
-
-
-def test_multiple_visual_elements_receive_unique_ids():
-
-    agent = create_test_engine()
-
-    agent.summarize_visual_element = (
-        lambda image_bytes, element_type="chart":
-        f"Summary for {element_type}"
-    )
-
-    first_id = agent.ingest_image_element(
-        b"chart-data",
-        "chart",
-    )
-
-    second_id = agent.ingest_image_element(
-        b"table-data",
-        "table",
-    )
-
-    assert first_id != second_id
-
-    assert len(agent.docstore) == 2
-
-    assert len(agent.vector_index) == 2
-
-
-def test_retrieval_resolves_to_original_visual_asset():
-
-    agent = create_test_engine()
-
-    agent.summarize_visual_element = (
-        lambda image_bytes, element_type="chart":
-        "Quarterly revenue increased from Q1 to Q4."
-    )
-
-    original_bytes = b"financial-chart-data"
-
-    doc_id = agent.ingest_image_element(
-        image_bytes=original_bytes,
-        element_type="chart",
-    )
-
-    results = agent.retrieve_visual_context(
-        "quarterly revenue",
-        top_k=1,
-    )
-
-    assert len(results) == 1
-
-    assert results[0]["doc_id"] == doc_id
-
-    matched_doc = agent.docstore[
-        results[0]["doc_id"]
-    ]
-
-    assert matched_doc["type"] == "image"
-
-    assert (
-        base64.b64decode(
-            matched_doc["b64"]
+        prompt = (
+            f"Analyze this {element_type}. "
+            "Detail all important data points, trends, "
+            "relationships, columns, labels, and "
+            "structural information so the description "
+            "can be used for dense semantic retrieval."
         )
-        == original_bytes
-    )
+
+        response = self.client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt,
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": (
+                                    "data:image/png;base64,"
+                                    f"{b64_img}"
+                                )
+                            },
+                        },
+                    ],
+                }
+            ],
+            max_tokens=500,
+        )
+
+        return response.choices[0].message.content
+
+    def ingest_image_element(
+        self,
+        image_bytes: bytes,
+        element_type: str = "chart",
+    ) -> str:
+
+        doc_id = str(uuid.uuid4())
+
+        summary = self.summarize_visual_element(
+            image_bytes=image_bytes,
+            element_type=element_type,
+        )
+
+        self.docstore[doc_id] = {
+            "type": "image",
+            "element_type": element_type,
+            "b64": self._encode_image_b64(
+                image_bytes
+            ),
+        }
+
+        self.vector_index.append(
+            {
+                "doc_id": doc_id,
+                "summary": summary,
+                "element_type": element_type,
+            }
+        )
+
+        return doc_id
+
+    def retrieve_visual_context(
+        self,
+        user_query: str,
+        top_k: int = 1,
+    ) -> List[Dict]:
+        """
+        Retrieve visual elements using their textual
+        summary representations.
+        """
+
+        return self.retriever.retrieve(
+            query=user_query,
+            top_k=top_k,
+        )
+
+    def query_multimodal(
+        self,
+        user_query: str,
+    ) -> str:
+
+        if not self.vector_index:
+            raise ValueError(
+                "No visual elements have been indexed."
+            )
+
+        results = self.retrieve_visual_context(
+            user_query=user_query,
+            top_k=1,
+        )
+
+        if not results:
+            raise ValueError(
+                "No relevant visual elements found."
+            )
+
+        matched_doc_id = results[0]["doc_id"]
+
+        raw_asset = self.docstore[
+            matched_doc_id
+        ]
+
+        response = self.client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "Answer the following query "
+                                "using the provided visual "
+                                "context:\n\n"
+                                f"{user_query}"
+                            ),
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": (
+                                    "data:image/png;base64,"
+                                    f"{raw_asset['b64']}"
+                                )
+                            },
+                        },
+                    ],
+                }
+            ],
+        )
+
+        return response.choices[0].message.content
