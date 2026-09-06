@@ -390,6 +390,3 @@ It is **not a substitute for qualified legal advice or professional legal review
 **Sciddhanto Sinha**
 
 B.Tech – Computer Science Engineering (AI & Analytics)
-
-After it commits, tell me **done**. Then we'll do a final Project 02 GitHub structure check before moving to the next improvement.
-
