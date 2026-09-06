@@ -75,34 +75,25 @@ def test_agent_can_return_final_response_without_tool_call():
             self.tool_calls = None
             self.content = "Research completed."
 
-
     class FakeChoice:
         def __init__(self):
             self.message = FakeMessage()
-
 
     class FakeResponse:
         def __init__(self):
             self.choices = [FakeChoice()]
 
-
     class FakeCompletions:
-
         def create(self, **kwargs):
             return FakeResponse()
 
-
     class FakeChat:
-
         def __init__(self):
             self.completions = FakeCompletions()
 
-
     class FakeClient:
-
         def __init__(self):
             self.chat = FakeChat()
-
 
     agent = AutonomousResearchAgent.__new__(
         AutonomousResearchAgent
@@ -166,45 +157,34 @@ def test_unknown_tool_is_rejected():
         name = "unknown_tool"
         arguments = "{}"
 
-
     class FakeToolCall:
         id = "test-tool-call"
         function = FakeToolCallFunction()
-
 
     class FakeMessage:
         def __init__(self):
             self.tool_calls = [FakeToolCall()]
             self.content = None
 
-
     class FakeChoice:
         def __init__(self):
             self.message = FakeMessage()
-
 
     class FakeResponse:
         def __init__(self):
             self.choices = [FakeChoice()]
 
-
     class FakeCompletions:
-
         def create(self, **kwargs):
             return FakeResponse()
 
-
     class FakeChat:
-
         def __init__(self):
             self.completions = FakeCompletions()
 
-
     class FakeClient:
-
         def __init__(self):
             self.chat = FakeChat()
-
 
     agent = AutonomousResearchAgent.__new__(
         AutonomousResearchAgent
@@ -220,3 +200,47 @@ def test_unknown_tool_is_rejected():
             research_topic="Test research topic",
             max_steps=1,
         )
+
+
+def test_zero_yield_observation_is_detected():
+    assert (
+        AutonomousResearchAgent._is_zero_yield_observation(
+            "No papers found."
+        )
+        is True
+    )
+
+    assert (
+        AutonomousResearchAgent._is_zero_yield_observation(
+            "No papers found"
+        )
+        is True
+    )
+
+    assert (
+        AutonomousResearchAgent._is_zero_yield_observation("")
+        is True
+    )
+
+
+def test_non_empty_observation_is_not_zero_yield():
+    observation = (
+        "Title: Retrieval Augmented Generation\n"
+        "Abstract: A research paper about RAG."
+    )
+
+    assert (
+        AutonomousResearchAgent._is_zero_yield_observation(
+            observation
+        )
+        is False
+    )
+
+
+def test_reflection_message_contains_strategy_change():
+    message = AutonomousResearchAgent._reflection_message()
+
+    assert "SCRATCHPAD REFLECTION" in message
+    assert "re-evaluate" in message
+    assert "avoid" in message
+    assert "unsuccessful query" in message
