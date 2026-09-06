@@ -792,6 +792,3 @@ LLM-generated research outputs should be independently verified before being use
 **Sciddhanto Sinha**
 
 B.Tech – Computer Science Engineering (AI & Analytics)
-
-
-Then tell me **“done”**.
