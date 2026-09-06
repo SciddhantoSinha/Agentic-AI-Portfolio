@@ -1,4 +1,4 @@
-# ⚖️ Legal AI Assistant
+# ⚖️ Enterprise Legal AI Assistant
 
 A domain-constrained Legal AI system that analyzes contract text, produces strictly validated structured findings, assigns risk levels, and verifies that every cited clause is grounded in the original contract text.
 
