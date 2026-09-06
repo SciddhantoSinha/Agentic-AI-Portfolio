@@ -1,8 +1,6 @@
-# 🤖 Agentic AI Portfolio
+ # 🤖 Agentic AI Portfolio
 
 ### A Progressive Portfolio of Retrieval-Augmented Generation, Autonomous Agents, Multimodal AI, and Real-Time Agentic Systems
-
----
 
 ## 📌 Portfolio Overview
 
@@ -45,8 +43,6 @@ Multimodal Intelligence
 Real-Time Corrective Agentic Systems
 ```
 
----
-
 # 🎯 Portfolio Objective
 
 The objective of this portfolio is to demonstrate practical understanding of modern AI application architecture rather than focusing only on isolated model calls.
@@ -70,7 +66,6 @@ The projects explore how AI systems can be designed to:
 
 The portfolio focuses on **system design, orchestration, retrieval, verification, and agentic behavior**.
 
----
 
 # 🧠 Portfolio Architecture
 
@@ -102,8 +97,6 @@ The five projects form an architectural progression.
                                                             │ Agentic RAG      │
                                                             └──────────────────┘
 ```
-
----
 
 # 📚 Projects
 
@@ -158,8 +151,6 @@ Generated Answer
 ### Primary Learning Outcome
 
 Understanding the internal mechanics of a RAG system rather than treating retrieval as a black-box component.
-
----
 
 # ⚖️ 02 — Enterprise Legal AI Assistant
 
@@ -217,8 +208,6 @@ CRITICAL
 ### Primary Learning Outcome
 
 Demonstrating how generative AI can be constrained using structured schemas and deterministic validation.
-
----
 
 # 🔬 03 — Autonomous Research Agent
 
@@ -280,8 +269,6 @@ Final Synthesis
 ### Primary Learning Outcome
 
 Understanding how an AI system can move from a single request-response interaction toward iterative autonomous tool use.
-
----
 
 # 🖼️ 04 — Multimodal RAG Engine
 
@@ -356,8 +343,6 @@ The original visual asset is preserved while a Vision LLM creates a searchable t
 ### Primary Learning Outcome
 
 Understanding how retrieval representation and generation representation can be separated when important information exists inside visual structures.
-
----
 
 # ⚡ 05 — Real-Time Agentic RAG System
 
@@ -434,8 +419,6 @@ If internal evidence is insufficient, the pipeline can perform corrective live s
 
 Demonstrating how a RAG system can become a conditional agentic workflow that dynamically chooses information sources, evaluates retrieval quality, performs corrective retrieval, and verifies generated responses.
 
----
-
 # 🧩 Cross-Project Capability Matrix
 
 | Capability             | Project 01 | Project 02 | Project 03 | Project 04 | Project 05 |
@@ -456,8 +439,6 @@ Demonstrating how a RAG system can become a conditional agentic workflow that dy
 | Telemetry              |          — |          — |          — |          — |          ✅ |
 | Grounding Verification |          — |          ✅ |          — |          — |          ✅ |
 
----
-
 # 🏗️ Architectural Evolution
 
 The portfolio demonstrates a progression in system complexity.
@@ -474,8 +455,6 @@ Generate
 
 The system learns the fundamental RAG workflow.
 
----
-
 ## Stage 2 — Structured Enterprise AI
 
 ```text
@@ -489,8 +468,6 @@ Deterministic Validation
 ```
 
 The system becomes constrained by schemas and validation rules.
-
----
 
 ## Stage 3 — Autonomous Tool Use
 
@@ -512,8 +489,6 @@ Final Answer
 
 The system gains iterative behavior.
 
----
-
 ## Stage 4 — Multimodal Intelligence
 
 ```text
@@ -531,8 +506,6 @@ Multimodal Generation
 ```
 
 The system expands beyond text.
-
----
 
 ## Stage 5 — Real-Time Agentic RAG
 
@@ -555,8 +528,6 @@ Response
 ```
 
 The system becomes conditional, corrective, and capable of integrating live information.
-
----
 
 # 🔄 Complete Portfolio Learning Path
 
@@ -587,8 +558,6 @@ The system becomes conditional, corrective, and capable of integrating live info
                     └─────────────────────┘
 ```
 
----
-
 # 🛠️ Technologies Across the Portfolio
 
 | Technology    | Portfolio Usage                       |
@@ -605,8 +574,6 @@ The system becomes conditional, corrective, and capable of integrating live info
 | Pytest        | Unit and integration testing          |
 | python-dotenv | Environment configuration             |
 | GitHub        | Version control and portfolio hosting |
-
----
 
 # 🧪 Testing Philosophy
 
@@ -633,8 +600,6 @@ Where external APIs are involved, deterministic components are isolated and exte
 
 This allows core application behavior to be validated without requiring every test to make a live API request.
 
----
-
 # 🔐 Environment & Security
 
 API credentials are intentionally excluded from version control.
@@ -655,8 +620,6 @@ REDIS_URL=redis://localhost:6379
 ```
 
 Real credentials should never be committed to GitHub.
-
----
 
 # 📂 Repository Structure
 
@@ -714,8 +677,6 @@ Agentic-AI-Portfolio/
 └── README.md
 ```
 
----
-
 # 🚀 How to Explore the Portfolio
 
 The recommended order is:
@@ -751,8 +712,6 @@ Explore how Vision LLMs and dual representations extend RAG beyond text.
 ### 5️⃣ Finish with Project 05
 
 Understand how dynamic routing, retrieval evaluation, corrective retrieval, live search, caching, and telemetry can be combined into a more production-oriented agentic RAG architecture.
-
----
 
 # 🎯 Skills Demonstrated
 
@@ -806,8 +765,6 @@ This portfolio demonstrates practical experience with:
 * Environment Configuration
 * Telemetry
 
----
-
 # 📊 Architecture Complexity Progression
 
 ```text
@@ -841,8 +798,6 @@ Real-Time Agentic RAG
 Route → Retrieve → Evaluate → Correct → Generate → Verify
 ```
 
----
-
 # 🔬 Engineering Principles
 
 The portfolio emphasizes several important AI engineering principles.
@@ -851,19 +806,13 @@ The portfolio emphasizes several important AI engineering principles.
 
 Relevant evidence should be retrieved before asking the model to generate an answer.
 
----
-
 ## 2. Structured Outputs
 
 Where possible, model outputs should be represented using explicit schemas instead of relying entirely on free-form text.
 
----
-
 ## 3. Deterministic Validation
 
 Important behaviors should have deterministic checks wherever practical.
-
----
 
 ## 4. Separation of Responsibilities
 
@@ -881,15 +830,11 @@ Telemetry
 
 This improves maintainability and makes individual components easier to test.
 
----
-
 ## 5. External Services Should Be Isolated
 
 External API calls are wrapped behind dedicated components.
 
 This allows core application logic to be tested independently.
-
----
 
 ## 6. Prototype vs Production
 
@@ -920,8 +865,6 @@ Production-grade systems would require additional considerations such as:
 * Cost management
 
 The portfolio does not claim production benchmark results that have not actually been measured.
-
----
 
 # 🏭 Production-Oriented Extensions
 
@@ -957,8 +900,6 @@ Potential technologies include:
 * RAGAS
 * TruLens
 
----
-
 # 📈 Evaluation
 
 The portfolio can be evaluated using different criteria depending on the project.
@@ -990,8 +931,6 @@ The portfolio can be evaluated using different criteria depending on the project
 * Table/chart interpretation
 
 The final Real-Time Agentic RAG architecture can additionally be evaluated using RAG-specific metrics such as Context Relevance, Groundedness/Faithfulness, and Answer Relevance. 
-
----
 
 # 🧠 What This Portfolio Demonstrates
 
@@ -1031,8 +970,6 @@ Cache Responses
 Track System Behavior
 ```
 
----
-
 # 🏆 Final Portfolio Architecture
 
 ```text
@@ -1068,8 +1005,6 @@ Track System Behavior
                     │       PROJECT 05        │
                     └─────────────────────────┘
 ```
-
----
 
 # 👨‍💻 Author
 
