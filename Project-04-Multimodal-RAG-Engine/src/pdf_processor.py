@@ -139,12 +139,13 @@ class PDFProcessor:
 
         document = fitz.open(pdf_path)
 
-        if page_number > len(document):
-            document.close()
+            if page_number > len(document):
+                page_count = len(document)
+                document.close()
 
-            raise ValueError(
-                f"PDF contains only {len(document)} pages."
-            )
+    raise ValueError(
+        f"PDF contains only {page_count} pages."
+    )
 
         page = document.load_page(
             page_number - 1
