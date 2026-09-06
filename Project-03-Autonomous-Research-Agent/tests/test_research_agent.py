@@ -241,6 +241,6 @@ def test_reflection_message_contains_strategy_change():
     message = AutonomousResearchAgent._reflection_message()
 
     assert "SCRATCHPAD REFLECTION" in message
-    assert "re-evaluate" in message
+    assert "Re-evaluate" in message
     assert "avoid" in message
     assert "unsuccessful query" in message
