@@ -1,5 +1,5 @@
 from src.arxiv_tool import search_arxiv
-from src.research_agent import registry
+from src.research_agent import AutonomousResearchAgent, registry
 from src.tool_registry import ToolRegistry
 
 
@@ -44,6 +44,41 @@ def test_arxiv_tool_definition():
 
 
 def test_search_arxiv_returns_string():
-    # We don't call the live ArXiv API in the unit test.
-    # The actual API integration will be tested separately.
     assert callable(search_arxiv)
+
+
+def test_agent_can_return_final_response_without_tool_call():
+    class FakeMessage:
+        def __init__(self):
+            self.tool_calls = None
+            self.content = "Research completed."
+
+    class FakeChoice:
+        def __init__(self):
+            self.message = FakeMessage()
+
+    class FakeResponse:
+        def __init__(self):
+            self.choices = [FakeChoice()]
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            return FakeResponse()
+
+    class FakeChat:
+        def __init__(self):
+            self.completions = FakeCompletions()
+
+    class FakeClient:
+        def __init__(self):
+            self.chat = FakeChat()
+
+    agent = AutonomousResearchAgent.__new__(AutonomousResearchAgent)
+    agent.client = FakeClient()
+
+    result = agent.run(
+        research_topic="Test research topic",
+        max_steps=1,
+    )
+
+    assert result == "Research completed."
