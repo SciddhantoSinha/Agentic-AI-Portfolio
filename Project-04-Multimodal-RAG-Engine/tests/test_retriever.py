@@ -70,7 +70,8 @@ def test_retriever_ranks_higher_overlap_first():
     retriever = MultimodalRetriever(index)
 
     results = retriever.retrieve(
-        "revenue quarterly growth"
+        "revenue quarterly growth",
+        top_k=2,
     )
 
     assert results[0]["doc_id"] == "chart-1"
